@@ -3,16 +3,18 @@ use kinds
 use system
 use function_derivative
 use qr
+use molden_output
 implicit none
 
 integer :: i, j, k
-real(KIND = dp), pointer :: x(:), H(:,:), gplus(:), gminus(:), xdum(:), A(:,:), q(:,:), r(:,:), u(:,:)
+real(KIND = dp), pointer :: x(:), H(:,:), gplus(:), gminus(:), xdum(:), A(:,:), q(:,:), r(:,:), u(:,:), frq(:)
+real(KIND = dp), pointer :: xc(:), yc(:), zc(:), mass(:)
 character(len=2) :: at
 
 open(3, file = "optimize.xyz")
 read(3,*)n
 rewind(3)
-allocate(x(3*n), H(3*n,3*n), gplus(3*n), gminus(3*n), xdum(3*n), A(3*n,3*n), q(3*n,3*n), r(3*n,3*n), u(3*n,3*n))
+allocate(x(3*n), H(3*n,3*n), gplus(3*n), gminus(3*n), xdum(3*n), A(3*n,3*n), q(3*n,3*n), r(3*n,3*n), u(3*n,3*n), frq(3*n))
 
 do i = 1, 36
     read(3,*)
@@ -21,6 +23,7 @@ do i = 1, 36
         read(3,*)at, x(3*(j-1)+1:3*j)
     end do
 end do
+close(3)
 
 H(:,:) = 0.0d0
 xdum(:) = x(:)
@@ -39,6 +42,8 @@ print *,"Hessian Matrix = "
 do i = 1, 3*n
     print "(18F10.6)", H(i,1:3*n) 
 end do
+
+print *, "--------------------------------------------------------------------------------------------------------"
 
 A(:,:) = H(:,:)
 DO k=1,20
@@ -59,5 +64,32 @@ do i=1,3*n
     PRINT "(18F10.6)", u(i,1:3*n)
 end do
 
+print *, "--------------------------------------------------------------------------------------------"
+
+do i = 1, 3*n
+    if(A(i,i) .lt. 0.d0)then
+        A(i,i) = -1*A(i,i)
+        frq(i) = -1*dsqrt(A(i,i))/(2*pi)
+    else
+        frq(i) = dsqrt(A(i,i))/(2*pi)
+    end if
+end do
+
+print *, "Frequencies: "
+print "(18F10.6)", frq(1:3*n)
+
+!---------------------------------------------------------------------------------------------------
+
+allocate(al(n), xc(n), yc(n), zc(n), mass(n))
+
+al(1:n) = "Ar"
+do i = 1, n
+    xc(i) = x(3*i - 2)
+    yc(i) = x(3*i -1)
+    zc(i) = x(3*i)
+end do
+mass(1:n) = 39.948d0
+
+call create_molden_vib_output(frq,u,al,xc,yc,zc,mass)
 
 end program project3
