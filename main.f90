@@ -17,7 +17,7 @@ PROGRAM main
  REAL(KIND=dp), EXTERNAL :: DDOT
 
 !Paramters
- REAL(KIND=dp), PARAMETER :: gnorm_cut=1.E-5, step_max=0.5_dp
+ REAL(KIND=dp), PARAMETER :: gnorm_cut=5.E-5, step_max=0.5_dp
  INTEGER, PARAMETER :: maxiopt=100
 
 
