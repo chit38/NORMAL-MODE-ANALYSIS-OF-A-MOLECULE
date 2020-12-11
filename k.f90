@@ -4,6 +4,7 @@ use system
 use function_derivative
 use qr
 use molden_output
+use nmd
 implicit none
 
 integer :: i, j, k
@@ -14,6 +15,7 @@ character(len=2) :: at
 open(3, file = "optimize.xyz")
 read(3,*)n
 rewind(3)
+print *, "Number of atoms: ", n
 allocate(x(3*n), H(3*n,3*n), gplus(3*n), gminus(3*n), xdum(3*n), A(3*n,3*n), q(3*n,3*n), r(3*n,3*n), u(3*n,3*n), frq(3*n))
 
 do i = 1, 36
@@ -66,6 +68,7 @@ end do
 
 print *, "--------------------------------------------------------------------------------------------"
 
+
 do i = 1, 3*n
     if(A(i,i) .lt. 0.d0)then
         A(i,i) = -1*A(i,i)
@@ -75,9 +78,12 @@ do i = 1, 3*n
     end if
 end do
 
-print *, "Frequencies: "
-print "(18F10.6)", frq(1:3*n)
+frq(:) = frq(:)/(3.4E-8)
 
+print *, "Frequencies: "
+do i = 1, 3*n
+print "(2ES16.6)", frq(i)
+end do
 !---------------------------------------------------------------------------------------------------
 
 allocate(al(n), xc(n), yc(n), zc(n), mass(n))
@@ -91,5 +97,7 @@ end do
 mass(1:n) = 39.948d0
 
 call create_molden_vib_output(frq,u,al,xc,yc,zc,mass)
+
+call print_nmd(al, x, frq, u)
 
 end program project3

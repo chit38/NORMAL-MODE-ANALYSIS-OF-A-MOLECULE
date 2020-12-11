@@ -44,13 +44,11 @@ CONTAINS
         if(i .ne. j) then
         d = x((i-1)*3+1:3*i) .distance. x((j-1)*3+1:3*j)
         dum(1:3) = x((i-1)*3+1:3*i) - x((j-1)*3+1:3*j)
-        !dum(:) = abs(dum(:))
         d2=1.d0/(d**2)
         d6=d2*d2*d2
         d12=d6*d6
         g((i-1)*3+1:3*i) = g((i-1)*3+1:3*i) + (-2.D0*d12+d6)*dum(:)*d2
         dum(:) = 0
-        !g((i-1)*3+1:3*i) = d
         end if
       end do
     end do

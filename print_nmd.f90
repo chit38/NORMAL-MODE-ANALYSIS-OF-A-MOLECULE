@@ -27,6 +27,8 @@ SUBROUTINE print_nmd(al,x,eigen_values,eigen_vectors)
     myfmt2="*"
   END IF
   print*,myfmt2
+
+  open(32, file = "vib.nmd")
   WRITE(32,myfmt) "names", (al(i),i=1,n)
 
   WRITE(32,myfmt2)"coordinates", (x(i),i=1,3*n)
@@ -36,7 +38,7 @@ SUBROUTINE print_nmd(al,x,eigen_values,eigen_vectors)
   IF(nn+1<10)THEN
     WRITE(myfmt,"(A10,i1,A6)") "(a4,2x,i2,",nn+1,"F10.3)"
   ELSE IF(nn+1<100)THEN
-    WRITE(myfmt,"(A10,i2,A6)") "(a4,2x,i2,",nn+1,"F10.3)"
+    WRITE(myfmt,"(A10,i2,A6)") "(a4,2x,i2,",nn+1,"F15.3)"
   ELSE
 !   This may not work
     myfmt="*"

@@ -15,17 +15,33 @@ CONTAINS
       IMPLICIT NONE
 !     Arguments
       REAL*8, POINTER :: vib_freq(:),normal_mode(:,:),xc(:),yc(:),zc(:)
-      REAL*8, POINTER :: mass(:)
+      REAL*8, POINTER :: mass(:),an(:)
       CHARACTER(LEN=2), POINTER :: al(:)
 
 !     ==--------------------------------------------------------------==
       CHARACTER :: typ*2,a*8,ck(3)*7,fr*17,rm(5)*17
       INTEGER ::   i,j,k,l,n1,is,ia,at,he,m
       REAL*8  ::  gz,xcm,ycm,zcm
-      INTEGER  :: natoms
+      INTEGER  :: natoms,nc,nh
 !     ==--------------------------------------------------------------==
       
       natoms=SIZE(al)
+
+      ALLOCATE(an(natoms))
+
+      DO i = 1, natoms
+         nc = index(al(i),"C")
+         nh = index(al(i),"H")
+
+         IF(nc /= 0) THEN
+            an(i) = 6.d0
+         ELSEIF(nh /= 0) THEN
+             an(i) = 1.d0
+         ELSE
+             an(i)   = 18.d0
+         ENDIF
+
+      ENDDO
            
 !     write gaussianformated output into vib.log
 !     which are readable in molden/molekel to visualise the vibrations.
@@ -74,7 +90,7 @@ CONTAINS
             xc(i)=xcm - xc(i)
             yc(i)=ycm - yc(i)
             zc(i)=zcm - zc(i)
-            WRITE (15,22)  i, INT(mass(i)), at, xc(i), yc(i), zc(i)
+            WRITE (15,22)  i, INT(an(i)), at, xc(i), yc(i), zc(i)
          ENDDO
 
 ! ---- write some lines for molden -----------------------------
@@ -95,8 +111,8 @@ CONTAINS
      
 
 ! ---- write eigenvalues and eigenvectors in both files
-      DO 15 i=4,(3*natoms),3
-        WRITE(15,23) i-3, i-2, i-1
+      DO 15 i=1,(3*natoms),3
+        WRITE(15,23) i, i+1, i+2
         WRITE(15,24) typ, typ, typ
         WRITE(15,25) fr, (vib_freq(l),l=i,i+2)
         DO n1=1,5
@@ -105,7 +121,7 @@ CONTAINS
         WRITE(15,26) a,(ck(n1),n1=1,3),(ck(n1),n1=1,3),(ck(n1),n1=1,3)
         DO 16 j=1,3*natoms,3
           he=(j-1)/3+1
-          WRITE(15,27) he,INT(mass(he)),&
+          WRITE(15,27) he,INT(an(he)),&
                       (normal_mode(j,m),normal_mode(j+1,m),normal_mode(j+2,m),m=i,i+2) 
  16     CONTINUE
  15   CONTINUE
@@ -116,10 +132,10 @@ CONTAINS
  22   FORMAT(i5,i11,i14,4x,3(3x,f9.6))
  23   FORMAT(i22,2i23)
  24   FORMAT(20x,a2,2(21x,a2))
- 25   FORMAT(a17,f9.4,2f23.4)
+ 25   FORMAT(a17,f15.4,2f23.4)
  26   FORMAT(a8,3a7,2(2x,3a7))
  27   FORMAT(2i4,3(f9.2,2f7.2))
-
+      DEALLOCATE(an)
 !     ==--------------------------------------------------------------==
       RETURN
       END SUBROUTINE create_molden_vib_output  
