@@ -132,7 +132,7 @@ CONTAINS
  22   FORMAT(i5,i11,i14,4x,3(3x,f9.6))
  23   FORMAT(i22,2i23)
  24   FORMAT(20x,a2,2(21x,a2))
- 25   FORMAT(a17,f15.4,2f23.4)
+ 25   FORMAT(a17,f9.4,2f23.4)
  26   FORMAT(a8,3a7,2(2x,3a7))
  27   FORMAT(2i4,3(f9.2,2f7.2))
       DEALLOCATE(an)

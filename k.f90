@@ -9,7 +9,7 @@ implicit none
 
 integer :: i, j, k
 real(KIND = dp), pointer :: x(:), H(:,:), gplus(:), gminus(:), xdum(:), A(:,:), q(:,:), r(:,:), u(:,:), frq(:)
-real(KIND = dp), pointer :: xc(:), yc(:), zc(:), mass(:)
+real(KIND = dp), pointer :: xc(:), yc(:), zc(:), mass(:), M(:,:)
 character(len=2) :: at
 
 open(3, file = "optimize.xyz")
@@ -17,6 +17,7 @@ read(3,*)n
 rewind(3)
 print *, "Number of atoms: ", n
 allocate(x(3*n), H(3*n,3*n), gplus(3*n), gminus(3*n), xdum(3*n), A(3*n,3*n), q(3*n,3*n), r(3*n,3*n), u(3*n,3*n), frq(3*n))
+allocate(M(3*n,3*n))
 
 do i = 1, 36
     read(3,*)
@@ -45,9 +46,16 @@ do i = 1, 3*n
     print "(18F10.6)", H(i,1:3*n) 
 end do
 
+M(:,:) = 0.d0
+do i = 1, 3*n
+    M(i,i) = (6.63E-26)**(-0.5)
+end do
+A = MATMUL(M, H)
+A = MATMUL(A, M)
+
 print *, "--------------------------------------------------------------------------------------------------------"
 
-A(:,:) = H(:,:)
+!A(:,:) = H(:,:)
 DO k=1,20
     CALL qrd(a,q,r)
     a=MATMUL(r,q)
@@ -78,8 +86,9 @@ do i = 1, 3*n
     end if
 end do
 
-frq(:) = frq(:)/(3.4E-8)
 
+frq(:) = frq(:)/(3E10)
+ 
 print *, "Frequencies: "
 do i = 1, 3*n
 print "(2ES16.6)", frq(i)
