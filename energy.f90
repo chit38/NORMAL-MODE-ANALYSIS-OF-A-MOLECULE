@@ -52,6 +52,7 @@ CONTAINS
         end if
       end do
     end do
+    g(1:3*n) = 24.d0*g(1:3*n)
   END SUBROUTINE grad
 
 END MODULE
